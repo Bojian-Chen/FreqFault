@@ -1,6 +1,6 @@
 <div align="center">
 
-# UniFreq
+# FreqFault
 
 **面向机械故障诊断的预训练时频表征模型**
 
@@ -15,6 +15,9 @@
 [English](README.md) · [模型列表](#model-zoo) · [快速开始](#quick-start) · [下游任务](#downstream-tasks) · [PHMFD 数据](#phmfd-data)
 
 </div>
+
+FreqFault 提供 UniFreq、UniFault 和 TF-ProFM 的特征提取与下游评估。
+GitHub 仓库原名为 UniFreq；Hugging Face 模型 ID 和 Python API 名称保持不变。
 
 UniFreq 是一个紧凑的双分支编码器，可将变长、多通道振动信号转换为时域、频域
 和融合表征。公开 checkpoint 托管在 Hugging Face，并通过 `safetensors`
@@ -65,8 +68,8 @@ flowchart LR
 需要 Python 3.9 或更高版本。
 
 ```bash
-git clone https://github.com/Bojian-Chen/UniFreq.git
-cd UniFreq
+git clone https://github.com/Bojian-Chen/FreqFault.git
+cd FreqFault
 
 python -m venv .venv
 source .venv/bin/activate
@@ -128,7 +131,7 @@ python inference.py \
 
 ## 🧠 下游任务
 
-处理后的 Parquet 文件应包含 `samples` 和 `labels` 两列。UniFreq 通过
+处理后的 Parquet 文件应包含 `samples` 和 `labels` 两列。FreqFault 通过
 `downstream.py` 提供两种下游流程。
 
 | 流程 | 训练参数 | 所需划分 | 主要输出 |
@@ -240,7 +243,7 @@ python inference.py \
 ## 🗂️ 仓库结构
 
 ```text
-UniFreq/
+FreqFault/
 ├── downstream.py          # 分类器微调与 KNN
 ├── inference.py           # 特征提取命令行入口
 ├── config.example.json
@@ -267,7 +270,7 @@ model.safetensors
 
 ## 📄 许可证
 
-UniFreq 使用 [MIT License](LICENSE)。
+FreqFault 使用 [MIT License](LICENSE)。
 
 ## UniFault 与 TF-ProFM
 

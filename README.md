@@ -1,6 +1,6 @@
 <div align="center">
 
-# UniFreq
+# FreqFault
 
 **Pretrained time–frequency representations for machinery fault diagnosis**
 
@@ -15,6 +15,10 @@
 [中文文档](README_zh.md) · [Model Zoo](#model-zoo) · [Quick Start](#quick-start) · [Downstream Tasks](#downstream-tasks) · [PHMFD Data](#phmfd-data)
 
 </div>
+
+FreqFault provides feature extraction and downstream evaluation for UniFreq,
+UniFault, and TF-ProFM. The GitHub repository was formerly named UniFreq;
+Hugging Face model IDs and Python API names retain their existing names.
 
 UniFreq is a compact dual-branch encoder that turns variable-length,
 multi-channel vibration signals into time-domain, frequency-domain, and fused
@@ -73,8 +77,8 @@ encoding.
 Python 3.9 or newer is required.
 
 ```bash
-git clone https://github.com/Bojian-Chen/UniFreq.git
-cd UniFreq
+git clone https://github.com/Bojian-Chen/FreqFault.git
+cd FreqFault
 
 python -m venv .venv
 source .venv/bin/activate
@@ -139,7 +143,7 @@ to a local directory containing `config.json` and `model.safetensors`.
 ## 🧠 Downstream Tasks
 
 Processed Parquet files are expected to contain `samples` and `labels` columns.
-UniFreq provides two downstream workflows through `downstream.py`.
+FreqFault provides two downstream workflows through `downstream.py`.
 
 | Workflow | Learned parameters | Required splits | Main outputs |
 | --- | --- | --- | --- |
@@ -251,7 +255,7 @@ python inference.py \
 ## 🗂️ Repository Layout
 
 ```text
-UniFreq/
+FreqFault/
 ├── downstream.py          # Classifier fine-tuning and KNN
 ├── inference.py           # Feature extraction CLI
 ├── config.example.json
@@ -279,7 +283,7 @@ unsupported.
 
 ## 📄 License
 
-UniFreq is released under the [MIT License](LICENSE).
+FreqFault is released under the [MIT License](LICENSE).
 
 ## UniFault and TF-ProFM
 
