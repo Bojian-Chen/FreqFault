@@ -5,7 +5,7 @@
 **面向机械故障诊断的预训练时频表征模型**
 
 <p>
-  <a href="https://huggingface.co/bojian1/UniFreq"><img alt="Hugging Face 模型" src="https://img.shields.io/badge/Hugging_Face-Models-FFD21E?logo=huggingface&logoColor=black"></a>
+  <a href="https://huggingface.co/bojian1/FreqFault"><img alt="Hugging Face 模型" src="https://img.shields.io/badge/Hugging_Face-Models-FFD21E?logo=huggingface&logoColor=black"></a>
   <a href="https://huggingface.co/datasets/bojian1/PHMFD-data"><img alt="PHMFD 数据集" src="https://img.shields.io/badge/Hugging_Face-Dataset-FFD21E?logo=huggingface&logoColor=black"></a>
   <img alt="Python 3.9+" src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white">
   <img alt="PyTorch 1.12+" src="https://img.shields.io/badge/PyTorch-1.12%2B-EE4C2C?logo=pytorch&logoColor=white">
@@ -16,10 +16,11 @@
 
 </div>
 
-FreqFault 提供 UniFreq、UniFault 和 TF-ProFM 的特征提取与下游评估。
-GitHub 仓库原名为 UniFreq；Hugging Face 模型 ID 和 Python API 名称保持不变。
+本仓库提供 FreqFault、UniFault 和 TF-ProFM 的特征提取与下游评估。
+项目和 Hugging Face 仓库原名为 UniFreq，现已统一更名为 FreqFault；
+`UniFreqProcessor` 等 Python API 名称继续兼容现有代码。
 
-UniFreq 是一个紧凑的双分支编码器，可将变长、多通道振动信号转换为时域、频域
+FreqFault 是一个紧凑的双分支编码器，可将变长、多通道振动信号转换为时域、频域
 和融合表征。公开 checkpoint 托管在 Hugging Face，并通过 `safetensors`
 安全加载。
 
@@ -52,9 +53,9 @@ flowchart LR
 
 | 模型 | 时域维度 | 频域维度 | 融合维度 | 注意力头 | 每分支层数 | 参数量 | 权重大小 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| [UniFreq-tiny](https://huggingface.co/bojian1/UniFreq-tiny) | 64 | 64 | 128 | 2 | 4 | 42 万 | 1.69 MB |
-| [UniFreq-small](https://huggingface.co/bojian1/UniFreq-small) | 96 | 96 | 192 | 3 | 4 | 94 万 | 3.78 MB |
-| [UniFreq-base](https://huggingface.co/bojian1/UniFreq-base) | 128 | 128 | 256 | 4 | 4 | 167 万 | 6.69 MB |
+| [FreqFault-tiny](https://huggingface.co/bojian1/FreqFault-tiny) | 64 | 64 | 128 | 2 | 4 | 42 万 | 1.69 MB |
+| [FreqFault-small](https://huggingface.co/bojian1/FreqFault-small) | 96 | 96 | 192 | 3 | 4 | 94 万 | 3.78 MB |
+| [FreqFault-base](https://huggingface.co/bojian1/FreqFault-base) | 128 | 128 | 256 | 4 | 4 | 167 万 | 6.69 MB |
 
 三个版本均使用 0.1 秒输入窗口、800 个非直流频点、每个域 4 层 Transformer，
 以及谐波感知的频率位置编码。
@@ -88,7 +89,7 @@ import torch
 from model import UniFreqProcessor, load_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model, config = load_model("bojian1/UniFreq-base")
+model, config = load_model("bojian1/FreqFault-base")
 model = model.to(device)
 processor = UniFreqProcessor(config)
 
@@ -116,7 +117,7 @@ print(features.shape)  # torch.Size([2, 256])
 
 ```bash
 python inference.py \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --input samples.npy \
   --input-layout NL \
   --batch-size 32 \
@@ -147,7 +148,7 @@ python inference.py \
 
 ```bash
 python downstream.py finetune \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --train-file data/Process_data/IMS_FD/train.parquet \
   --val-file data/Process_data/IMS_FD/val.parquet \
   --test-file data/Process_data/IMS_FD/test.parquet \
@@ -158,7 +159,7 @@ python downstream.py finetune \
   --output-dir outputs/ims_fd_finetune
 ```
 
-默认同时微调编码器和分类器。设置 `--backbone-lr-scale 0` 可以冻结 UniFreq，
+默认同时微调编码器和分类器。设置 `--backbone-lr-scale 0` 可以冻结 FreqFault，
 仅训练新增分类器。
 
 输出目录包含最佳 `model.safetensors`、`classifier.safetensors`、对应的 JSON
@@ -171,7 +172,7 @@ KNN 会对 reference 和 query 特征执行 L2 归一化，计算余弦相似度
 
 ```bash
 python downstream.py knn \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --reference-file data/Process_data/PU/train_1p.parquet \
   --test-file data/Process_data/PU/test.parquet \
   --neighbors 5 \
@@ -204,7 +205,7 @@ hf download bojian1/PHMFD-data \
 
 ```bash
 python inference.py \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --input data/Process_data/PU/train_1shot.parquet \
   --input-key samples \
   --batch-size 8 \
@@ -285,7 +286,7 @@ FreqFault 使用 [MIT License](LICENSE)。
 
 各仓库默认使用训练 seed 42，提供 `seed-42`、`seed-43`、`seed-44` revision。
 这些预训练权重不含故障分类头或预训练投影头。UniFault 输出 token 均值特征，
-TF-ProFM 输出通道均值特征；只有 UniFreq 输出时域、频域分支特征。
+TF-ProFM 输出通道均值特征；只有 FreqFault 输出时域、频域分支特征。
 
 ```bash
 python inference.py --model-id bojian1/UniFault-small \
@@ -303,7 +304,7 @@ seed 独立；复现需固定设备、batch size、输入顺序与 seed。Python
 采用 `12 * floor(512 / 12) = 504` 维，而非要求 512 被 12 整除。
 [base 配置模板](configs/unifault-base.example.json) 是结构示例，不是预训练权重。
 当前可访问的 PHMFD `log/unifault` 中没有发现 base 预训练 checkpoint，因此尚未
-发布 UniFault-base 权重。已有的 `bojian1/UniFreq-base` 属于另一个模型。
+发布 UniFault-base 权重。已有的 `bojian1/FreqFault-base` 属于另一个模型。
 
 权重来源、SHA256 和 Hub commit 记录在
 [published_checkpoints.json](docs/published_checkpoints.json)，各模型的 Hugging Face

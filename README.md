@@ -5,7 +5,7 @@
 **Pretrained time–frequency representations for machinery fault diagnosis**
 
 <p>
-  <a href="https://huggingface.co/bojian1/UniFreq"><img alt="Hugging Face models" src="https://img.shields.io/badge/Hugging_Face-Models-FFD21E?logo=huggingface&logoColor=black"></a>
+  <a href="https://huggingface.co/bojian1/FreqFault"><img alt="Hugging Face models" src="https://img.shields.io/badge/Hugging_Face-Models-FFD21E?logo=huggingface&logoColor=black"></a>
   <a href="https://huggingface.co/datasets/bojian1/PHMFD-data"><img alt="PHMFD dataset" src="https://img.shields.io/badge/Hugging_Face-Dataset-FFD21E?logo=huggingface&logoColor=black"></a>
   <img alt="Python 3.9+" src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white">
   <img alt="PyTorch 1.12+" src="https://img.shields.io/badge/PyTorch-1.12%2B-EE4C2C?logo=pytorch&logoColor=white">
@@ -16,11 +16,12 @@
 
 </div>
 
-FreqFault provides feature extraction and downstream evaluation for UniFreq,
-UniFault, and TF-ProFM. The GitHub repository was formerly named UniFreq;
-Hugging Face model IDs and Python API names retain their existing names.
+This repository provides feature extraction and downstream evaluation for
+FreqFault, UniFault, and TF-ProFM. The project and Hugging Face repositories
+were formerly named UniFreq. Python API names such as `UniFreqProcessor`
+remain compatible with existing code.
 
-UniFreq is a compact dual-branch encoder that turns variable-length,
+FreqFault is a compact dual-branch encoder that turns variable-length,
 multi-channel vibration signals into time-domain, frequency-domain, and fused
 representations. Public checkpoints can be downloaded directly from Hugging
 Face and loaded safely with `safetensors`.
@@ -60,9 +61,9 @@ flowchart LR
 
 | Model | Time dim | Frequency dim | Fused dim | Heads | Layers / branch | Parameters | Weights |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| [UniFreq-tiny](https://huggingface.co/bojian1/UniFreq-tiny) | 64 | 64 | 128 | 2 | 4 | 420K | 1.69 MB |
-| [UniFreq-small](https://huggingface.co/bojian1/UniFreq-small) | 96 | 96 | 192 | 3 | 4 | 941K | 3.78 MB |
-| [UniFreq-base](https://huggingface.co/bojian1/UniFreq-base) | 128 | 128 | 256 | 4 | 4 | 1.67M | 6.69 MB |
+| [FreqFault-tiny](https://huggingface.co/bojian1/FreqFault-tiny) | 64 | 64 | 128 | 2 | 4 | 420K | 1.69 MB |
+| [FreqFault-small](https://huggingface.co/bojian1/FreqFault-small) | 96 | 96 | 192 | 3 | 4 | 941K | 3.78 MB |
+| [FreqFault-base](https://huggingface.co/bojian1/FreqFault-base) | 128 | 128 | 256 | 4 | 4 | 1.67M | 6.69 MB |
 
 All variants use a 0.1-second input window, 800 non-DC frequency bins, four
 Transformer layers per domain, and harmonic-aware frequency positional
@@ -98,7 +99,7 @@ import torch
 from model import UniFreqProcessor, load_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model, config = load_model("bojian1/UniFreq-base")
+model, config = load_model("bojian1/FreqFault-base")
 model = model.to(device)
 processor = UniFreqProcessor(config)
 
@@ -127,7 +128,7 @@ normalization, FFT, truncation, tail-statistics, masking, and padding settings.
 
 ```bash
 python inference.py \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --input samples.npy \
   --input-layout NL \
   --batch-size 32 \
@@ -158,7 +159,7 @@ validation macro-F1, then reloaded for final test evaluation.
 
 ```bash
 python downstream.py finetune \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --train-file data/Process_data/IMS_FD/train.parquet \
   --val-file data/Process_data/IMS_FD/val.parquet \
   --test-file data/Process_data/IMS_FD/test.parquet \
@@ -170,7 +171,7 @@ python downstream.py finetune \
 ```
 
 The encoder and classifier are fine-tuned together by default. Set
-`--backbone-lr-scale 0` to freeze UniFreq and train only the classifier.
+`--backbone-lr-scale 0` to freeze FreqFault and train only the classifier.
 
 The output directory contains the best `model.safetensors`,
 `classifier.safetensors`, their JSON configurations, `metrics.json`, and
@@ -183,7 +184,7 @@ uses unweighted majority voting.
 
 ```bash
 python downstream.py knn \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --reference-file data/Process_data/PU/train_1p.parquet \
   --test-file data/Process_data/PU/test.parquet \
   --neighbors 5 \
@@ -216,7 +217,7 @@ Run feature extraction directly on the downloaded Parquet file:
 
 ```bash
 python inference.py \
-  --model-id bojian1/UniFreq-base \
+  --model-id bojian1/FreqFault-base \
   --input data/Process_data/PU/train_1shot.parquet \
   --input-key samples \
   --batch-size 8 \
@@ -300,7 +301,7 @@ Each repository defaults to training seed 42 and also provides `seed-42`,
 `seed-43`, and `seed-44` revisions. These are pretrained backbone weights,
 without fault-label classifiers or pretraining projection heads. UniFault
 returns mean-pooled token features; TF-ProFM returns channel-averaged features.
-Only UniFreq outputs `time_features` and `frequency_features`.
+Only FreqFault outputs `time_features` and `frequency_features`.
 
 ```bash
 python inference.py --model-id bojian1/UniFault-small \
@@ -322,7 +323,7 @@ matching the original implementation. The
 [base configuration template](configs/unifault-base.example.json) is a structural
 example, not a pretrained checkpoint. No UniFault-base pretraining checkpoint
 was found in the available PHMFD `log/unifault` directory; no base weights have
-been published. `bojian1/UniFreq-base` is a different architecture.
+been published. `bojian1/FreqFault-base` is a different architecture.
 
 Checkpoint source paths, SHA256 hashes and Hub commit IDs are recorded in
 [published_checkpoints.json](docs/published_checkpoints.json). Each model's Hub
